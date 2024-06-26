@@ -444,3 +444,8 @@ You now have a functioning full stack chat application in which users can:
 - upload a custom document
 - ask questions about the document's content using an OpenAI LLM
 - view the highlighted source content of the LLM's response in a document view panel
+
+
+
+import { OpenAI } from 'langchain/llms/openai';
+import { loadQAStuffChain } from 'langchain/chains';

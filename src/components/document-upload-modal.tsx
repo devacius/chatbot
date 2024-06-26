@@ -42,10 +42,12 @@ export const DocumentUploadModal = ({
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
     const text = await readText(document);
+   
+    
     const response = await fetch('/api/upload-document', {
       method: 'POST',
       body: JSON.stringify({
-        text,
+        text:text,
         name: documentName,
       }),
     });

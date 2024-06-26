@@ -1,24 +1,47 @@
-import {OpenAIEmbeddings} from 'langchain/embeddings/openai';
-import {RecursiveCharacterTextSplitter} from 'langchain/text_splitter';
-import {OpenAI} from 'langchain/llms/openai';
-import {loadQAStuffChain} from 'langchain/chains';
-import {Document} from 'langchain/document';
-import type {Pinecone, QueryResponse} from '@pinecone-database/pinecone';
+import OpenAIApi from 'openai';
+import Configuration from 'openai';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { Document } from 'langchain/document';
+import { Pinecone, QueryResponse } from '@pinecone-database/pinecone';
+import { OpenAI } from 'langchain/llms/openai';
+import { loadQAStuffChain } from 'langchain/chains';
 
-export const insertDocument = async (index, doc: Document) => {
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+export const embedDocuments = async (texts: string[]): Promise<number[][]> => {
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input: texts,
+  });
+  return response.data.data.map((embedding) => embedding.embedding);
+};
+
+export const embedQuery = async (text: string): Promise<number[]> => {
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input: [text],
+  });
+  return response.data.data[0].embedding;
+};
+
+export const insertDocument = async (index, doc: Document): Promise<void> => {
   const text = doc.pageContent;
   const documentName = doc.metadata.documentName;
 
+  console.log(`${text} text`);
   const textSplitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
   });
-
+  console.log('Splitting text into chunks');
   const chunks = await textSplitter.createDocuments([text]);
-
-  const embeddingsArrays = await new OpenAIEmbeddings().embedDocuments(
-    chunks.map((chunk) => chunk.pageContent.replace(/\n/g, ' ')),
+  console.log(`${chunks}`);
+  const embeddingsArrays = await embedDocuments(
+    chunks.map((chunk) => chunk.pageContent.replace(/\n/g, ' '))
   );
-
+  console.log('Inserting chunks into Pinecone');
   const batchSize = 100;
   let batch: any = [];
   for (let i = 0; i < chunks.length; i++) {
@@ -39,63 +62,63 @@ export const insertDocument = async (index, doc: Document) => {
 
     if (batch.length === batchSize || i === chunks.length - 1) {
       await index.upsert(batch);
-
       batch = [];
     }
   }
 };
 
-export async function queryPinecone(
+export const queryPinecone = async (
   index,
   question: string,
-  documentName: string,
-) {
-  const queryEmbedding = await new OpenAIEmbeddings().embedQuery(question);
+  documentName: string
+): Promise<QueryResponse> => {
+  const queryEmbedding = await embedQuery(question);
 
-  let queryResponse = await index.query({
+  const queryResponse = await index.query({
     topK: 10,
     vector: queryEmbedding,
     includeMetadata: true,
     includeValues: true,
-    filter: {documentName: {$eq: documentName}},
+    filter: { documentName: { $eq: documentName } },
   });
 
   return queryResponse;
-}
+};
 
-type Source = {
+export type Source = {
   pageContent: string;
   score: number;
 };
+
 export type LLMResponse = {
   result: string;
   sources: Source[];
 };
 
-export async function queryLLM(
+export const queryLLM = async (
   queryResponse: QueryResponse,
-  question: string,
-): Promise<LLMResponse> {
+  question: string
+): Promise<LLMResponse> => {
+  const concatenatedPageContent = queryResponse.matches
+    .map((match: any) => match.metadata.pageContent)
+    .join('');
+
+  // Assuming you still use OpenAI for this part, if not, replace with appropriate LLM call
   const llm = new OpenAI({
     temperature: 0.3,
   });
   const chain = loadQAStuffChain(llm);
 
-  const concatenatedPageContent = queryResponse.matches
-    .map((match: any) => match.metadata.pageContent)
-    .join('');
-
   const result = await chain.call({
-    input_documents: [new Document({pageContent: concatenatedPageContent})],
+    input_documents: [new Document({ pageContent: concatenatedPageContent })],
     question: question,
   });
 
   return {
     result: result.text,
-    //@ts-ignore
-    sources: queryResponse.matches.map((x) => ({
+    sources: queryResponse.matches.map((x: any) => ({
       pageContent: x.metadata.pageContent,
       score: x.score,
     })),
   };
-}
+};

@@ -4,8 +4,10 @@ import {queryPinecone, queryLLM, LLMResponse} from '../../ai-util';
 
 async function handler(req: NextApiRequest, res: NextApiResponse<LLMResponse>) {
   const {documentName, question} = JSON.parse(req.body);
-
-  const client = new Pinecone();
+ //@ts-ignore
+  const client = new Pinecone({apiKey: process.env.PINECONE_API_KEY || '',
+    environment: process.env.PINECONE_ENVIRONMENT || ''
+  });
   const index = client.Index(process.env.PINECONE_INDEX_NAME || '');
 
   const queryResponse = await queryPinecone(index, question, documentName);
