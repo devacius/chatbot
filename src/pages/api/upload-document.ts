@@ -29,7 +29,7 @@ console.log(name)
     res.json({success: true});
   } catch (e) {
     res.json({success: false});
-    console.error(e);
+    
   }
 }
 export default handler;

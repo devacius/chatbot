@@ -60,6 +60,10 @@ export const DocumentUploadModal = ({
       setDocument(null);
       setDocument(false);
     }
+    else{
+      setIsLoading(false);
+      alert('You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.');
+    }
   }, [document, documentName, setActiveDocument, setIsOpen]);
 
   return (
