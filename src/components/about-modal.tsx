@@ -27,24 +27,15 @@ export const AboutModal = ({
           a document. Once the document is uploaded, you can begin chatting with
           it.
         </ParagraphMedium>
-        <ParagraphMedium color={theme.colors.contentSecondary}>
-          <StyledLink
-            animateUnderline
-            href="https://github.com/dbabbs/semantic-search-openai-nextjs-sample"
-            target="_blank"
-          >
-            Learn how this project was built
-          </StyledLink>
-          .
-        </ParagraphMedium>
+        
         <ParagraphMedium color={theme.colors.contentSecondary}>
           Made by{' '}
           <StyledLink
             animateUnderline
-            href="https://twitter.com/dbabbs"
+            href="https://twitter.com/devacius"
             target="_blank"
           >
-            Dylan Babbs
+            Deepansh Gupta
           </StyledLink>
           .
         </ParagraphMedium>
