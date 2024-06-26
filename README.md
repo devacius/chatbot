@@ -5,7 +5,7 @@ Users can upload a custom plain text document (`.txt` file) and ask the AI quest
 
 This project is tailored for web developers who are looking to learn more about integrating LLMs and vector databases into their projects.
 
-[**This guide is also available as a Medium article**](https://medium.com/@dbabbs/guide-create-a-full-stack-semantic-search-web-app-with-custom-documents-edeae2b35b3c)
+
 
 ![demo](./img/demo.gif)
 
@@ -16,7 +16,7 @@ While [ChatGPT](https://chat.openai.com/) can handle questions about documents, 
 - ChatGPT has a token limit and cannot answer questions about a document that exceeds the maximum length of a ChatGPT query.
 - ChatGPT does not have knowledge about non-public documents (eg: creating a search application for your organization's internal knowledge base).
 
-By [Dylan Babbs](https://twitter.com/dbabbs), built with guidance from Nader Dabit's [AI Semantic Search YouTube video](https://www.youtube.com/watch?v=6_mfYPPcZ60).
+By [Deepansh Gupta](https://twitter.com/devacius), built with guidance from Nader Dabit's [AI Semantic Search YouTube video].
 
 ## How it works
 
@@ -446,6 +446,3 @@ You now have a functioning full stack chat application in which users can:
 - view the highlighted source content of the LLM's response in a document view panel
 
 
-
-import { OpenAI } from 'langchain/llms/openai';
-import { loadQAStuffChain } from 'langchain/chains';
